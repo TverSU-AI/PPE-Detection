@@ -1,0 +1,1 @@
+python3 demos/demo_inference.py --cfg ../AlphaPose/configs/halpe_26/resnet/256x192_res50_lr1e-3_2x.yaml --checkpoint ../AlphaPose/pretrained_models/halpe26_fast_res50_256x192.pth --image /home/throder/Загрузки/putin-t-pose.jpg --save_img --format coco --vis_fast --posebatch 64 --detbatch 8

@@ -1,0 +1,9 @@
+*.jpg
+*.jpeg
+*.png
+*.json
+
+!configs/pose_estimator_config.json
+
+.mypy_cache
+__pycache__
