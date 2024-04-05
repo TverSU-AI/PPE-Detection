@@ -1,0 +1,1 @@
+python3 demos/images_to_jsons.py

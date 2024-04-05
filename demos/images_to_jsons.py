@@ -53,7 +53,7 @@ def show_posed_image(posed_image: MatLike, name: str) -> None:
 def save_packed_json(packed_json: dict, output_path: str) -> None:
     filepath = str(Path(output_path, f"{packed_json['image_id']}.json"))
     with open(filepath, "w") as f:
-        json.dump(packed_json, f)
+        json.dump(packed_json, f, indent=2)
 
 
 def main() -> None:
