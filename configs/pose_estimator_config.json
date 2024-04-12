@@ -15,6 +15,6 @@
     "vis_fast": true,
     "pose_flow": false,
     "pose_track": false,
-    "model_cfg": "",
-    "model_weights": ""
+    "model_cfg": "../AlphaPose/detector/yolo/cfg/yolov3-spp.cfg",
+    "model_weights": "../AlphaPose/detector/yolo/data/yolov3-spp.weights"
 }
