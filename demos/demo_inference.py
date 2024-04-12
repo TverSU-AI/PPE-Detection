@@ -10,7 +10,6 @@ import torch
 from tqdm import tqdm
 import natsort
 
-from detector.apis import get_detector
 from trackers.tracker_api import Tracker
 from trackers.tracker_cfg import cfg as tcfg
 from trackers import track
@@ -83,6 +82,8 @@ parser.add_argument('--pose_flow', dest='pose_flow',
                     help='track humans in video with PoseFlow', action='store_true', default=False)
 parser.add_argument('--pose_track', dest='pose_track',
                     help='track humans in video with reid', action='store_true', default=False)
+parser.add_argument('--model_cfg', dest='model_cfg', default='detector/yolo/cfg/yolov3-spp.cfg')
+parser.add_argument('--model_weights', dest='model_weights', default='detector/yolo/weights/yolov3-spp.weights')
 
 args = parser.parse_args()
 cfg = update_config(args.cfg)
@@ -161,6 +162,14 @@ def loop():
     while True:
         yield n
         n += 1
+
+
+def get_detector(args):
+    from detector.yolo_api import YOLODetector
+    from detector.yolo_cfg import cfg
+    cfg["CONFIG"] = args.model_cfg
+    cfg["WEIGHTS"] = args.model_weights
+    return YOLODetector(cfg, args)
 
 
 if __name__ == "__main__":
