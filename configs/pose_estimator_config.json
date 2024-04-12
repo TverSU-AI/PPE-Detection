@@ -14,5 +14,7 @@
     "debug": false,
     "vis_fast": true,
     "pose_flow": false,
-    "pose_track": false
+    "pose_track": false,
+    "model_cfg": "",
+    "model_weights": ""
 }

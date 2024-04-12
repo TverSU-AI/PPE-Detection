@@ -12,7 +12,6 @@ from alphapose.utils.presets import SimpleTransform, SimpleTransform3DSMPL
 from alphapose.utils.transforms import flip, flip_heatmap
 from alphapose.models import builder
 from alphapose.utils.config import update_config
-from detector.apis import get_detector
 from alphapose.utils.vis import getTime
 
 
@@ -278,7 +277,15 @@ class SingleImageAlphaPose():
         self.pose_model.eval()
 
         self.det_loader = DetectionLoader(
-            get_detector(self.args), self.cfg, self.args)
+            self.get_detector(self.args), self.cfg, self.args)
+
+    @staticmethod
+    def get_detector(args):
+        from detector.yolo_api import YOLODetector
+        from detector.yolo_cfg import cfg
+        cfg["CONFIG"] = args.model_cfg
+        cfg["WEIGHTS"] = args.model_weights
+        return YOLODetector(cfg, args)
 
     def process(self, im_name, image):
         # Init data writer
