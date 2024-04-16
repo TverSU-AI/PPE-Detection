@@ -120,7 +120,7 @@ def example():
                 os.path.basename(image_name)[:-4] + "_zoned.jpg"), image_with_zone)
 
     with open(os.path.join(outputpath, os.path.basename(image_name)[:-4] + "_result_packed.json"), 'w') as json_file:
-        json_file.write(json.dumps(packed_json))
+        json_file.write(json.dumps(packed_json, indent=2))
 
 
 if __name__ == "__main__":
