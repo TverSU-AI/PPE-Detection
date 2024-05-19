@@ -24,6 +24,16 @@ def draw_hull(image: MatLike, zone: DangerZone, color: tuple[int, int, int] = (0
     return img
 
 
+def draw_convex_hull(image: MatLike, zone: DangerZone, color: tuple[int, int, int] = (0, 0, 255)) -> MatLike:
+    img = image.copy()
+
+    hull = np.array([point.to_list() for point in zone.convex_hull])
+
+    cv2.polylines(img, [hull], True, color, 2)
+
+    return img
+
+
 def draw_reference_lines(image: MatLike, zone: DangerZone, color: tuple[int, int, int] = (0, 0, 255)) -> MatLike:
     img = image.copy()
 
@@ -46,5 +56,4 @@ def draw_zone(image: MatLike, zone: DangerZone) -> MatLike:
     image_with_hull = draw_hull(image_with_hull, upper_zone)
 
     image_reference_lines = draw_reference_lines(image_with_hull, zone)
-
     return image_reference_lines
