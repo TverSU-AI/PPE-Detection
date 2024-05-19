@@ -182,19 +182,16 @@ def webcam_main():
             ret, frame = video.read()
             if frame is not None:
                 prediction = distance_estimator.predict(frame)
-
-                original_image_bgr = None
-                content = create_side_by_side(
-                    original_image_bgr, prediction, False)
-
-                three_d_image = create_3d_scene_from_depth_map(prediction)
+                depth_map = cv2.applyColorMap(
+                    np.uint8(prediction), cv2.COLORMAP_PLASMA)
 
                 cv2.imshow("Original", frame)
-                cv2.imshow('Distance estimation', content)
-                cv2.imshow("3D Depth map", three_d_image)
+                cv2.imshow('Distance estimation', depth_map)
 
                 if cv2.waitKey(1) & 0xFF == ord('q'):  # q key
                     break
+
+                # create_3d_scene_from_depth_map(prediction)
 
         video.release()
         cv2.destroyAllWindows()
@@ -213,20 +210,23 @@ def main():
 def main2():
     distance_predictor = MiDaSDistanceEstimator()
 
-    image_path = "/home/throder/disser/PPE_Detection/examples/demo/arlan.jpg"
+    image_path = "/home/throder/disser/PPE_Detection/examples/demo/tample.png"
     image = cv2.imread(image_path, 0)
 
-    depth_map = distance_predictor.predict(image)
+    prediction = distance_predictor.predict(image)
+    depth_map = cv2.applyColorMap(
+        np.uint8(prediction), cv2.COLORMAP_PLASMA)
     print(f"{depth_map.shape=}")
-    original_image_bgr = None
 
     cv2.imshow("Original", image)
     cv2.imshow("Distance estimation", depth_map)
 
+    cv2.imwrite("temple_depth_map.png", depth_map)
+
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-    create_3d_scene_from_depth_map(depth_map)
+    # create_3d_scene_from_depth_map(depth_map)
 
 
 if __name__ == "__main__":
