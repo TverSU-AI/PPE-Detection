@@ -37,7 +37,7 @@ def parse_arguments():
                         help="path to images dir", default=str(Path("examples", "demo")))
 
     parser.add_argument("--output_dir", type=str, required=False,
-                        help="path to jsons output dir", default=str(Path("examples", "res", "jsons")))
+                        help="path to jsons output dir", default=str(Path("examples", "res")))
 
     args = parser.parse_args()
 
@@ -51,9 +51,26 @@ def show_posed_image(posed_image: MatLike, name: str) -> None:
 
 
 def save_packed_json(packed_json: dict, output_path: str) -> None:
-    filepath = str(Path(output_path, f"{packed_json['image_id']}.json"))
+    filepath = str(Path(output_path, 'jsons',
+                   f"{packed_json['image_id']}.json"))
     with open(filepath, "w") as f:
         json.dump(packed_json, f, indent=2)
+
+
+def save_posed_image(posed_image: MatLike, output_path: str, image_name: str) -> None:
+    cv2.imwrite(os.path.join(output_path, 'posed_images',
+                os.path.basename(image_name)), posed_image)
+
+
+def create_output_dirs(output_path: str) -> None:
+    paths = [
+        output_path,
+        f"{output_path}/jsons",
+        f"{output_path}/posed_images"
+    ]
+    for path in paths:
+        if not os.path.exists(path):
+            os.mkdir(path)
 
 
 def main() -> None:
@@ -61,15 +78,15 @@ def main() -> None:
     args = parse_arguments()
 
     path_to_images_dir = args.image_dir
-
     output_path = args.output_dir
-    if not os.path.exists(output_path):
-        os.mkdir(output_path)
+
+    create_output_dirs(output_path)
 
     json_generator = JSONGenerator()
 
     for packed_json, posed_image in json_generator(path_to_images_dir):
         show_posed_image(posed_image, packed_json["image_id"])
+        save_posed_image(posed_image, output_path, packed_json["image_id"])
         save_packed_json(packed_json, output_path)
 
 

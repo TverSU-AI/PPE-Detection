@@ -21,7 +21,7 @@ class ImageReader:
 
     def __iter__(self):
         for image_path in self.images_paths:
-            img = cv2.imread(image_path)
+            img = cv2.cvtColor(cv2.imread(image_path), cv2.COLOR_BGR2RGB)
             name = image_path.split("/")[-1]
 
             yield name, img

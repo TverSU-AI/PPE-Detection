@@ -10,6 +10,8 @@ import json
 import sys
 import importlib
 from pathlib import Path
+from typing import Callable
+from cv2.typing import MatLike
 
 import cv2
 import torch
@@ -48,7 +50,7 @@ def parse_arguments():
     parser.add_argument('--detector', dest='detector',
                         help='detector name', default="yolo")
     parser.add_argument('--image', dest='inputimg',
-                        help='image-name', default="/home/throder/Загрузки/putin-t-pose.jpg")
+                        help='image-name', default="/home/throder/disser/PPE_Detection/examples/demo/1.jpg")
     parser.add_argument('--save_img', default=True, action='store_true',
                         help='save result as image')
     parser.add_argument('--vis', default=False, action='store_true',
@@ -84,7 +86,63 @@ def parse_arguments():
         "cuda:" + str(args.gpus[0]) if args.gpus[0] >= 0 else "cpu")
     args.tracking = args.pose_track or args.pose_flow or args.detector == 'tracker'
 
+    args.model_cfg = "../AlphaPose/detector/yolo/cfg/yolov3-spp.cfg"
+    args.model_weights = "../AlphaPose/detector/yolo/data/yolov3-spp.weights"
+
     return args
+
+
+def onMouse(event, x, y, flags, param):
+    if event == cv2.EVENT_LBUTTONDOWN:
+        param["drawing"] = True
+        print("PRESSED AT", x, y)
+
+    elif event == cv2.EVENT_MOUSEMOVE:
+        if param["drawing"] == True:
+            print("MOVING")
+
+    elif event == cv2.EVENT_LBUTTONUP:
+        param["drawing"] = False
+        print("UNPRESSED AT", x, y)
+
+
+def set_mouse_callback(callback: Callable, window_name: str = "image", param: dict | None = None):
+    cv2.setMouseCallback(window_name, callback, param)
+
+
+def use_webcam(pose_estimator: PoseEstimator, zone: DangerZone, *, use_mouse_callback: bool = True):
+    vid = cv2.VideoCapture(0)
+    image: MatLike | None = None
+    param = {
+        "drawing": False
+    }
+
+    if use_mouse_callback:
+        cv2.namedWindow('webcam')
+        set_mouse_callback(onMouse, "webcam", param)
+
+    while (True):
+        ret, frame = vid.read()
+
+        packed_json, posed_frame = pose_estimator.process(frame)
+
+        # image = draw_zone(posed_frame, zone)
+        image = posed_frame
+
+        cv2.imshow('webcam', image)
+
+        for people in packed_json["persons"]:
+            name = people["person_id"]
+            keypoints = people["keypoints"]
+
+            if zone.contain_pose(keypoints):
+                print(f"People[{name}] inside danger zone!")
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    vid.release()
+    cv2.destroyAllWindows()
 
 
 def example():
@@ -105,14 +163,24 @@ def example():
     cv2.imwrite(os.path.join(outputpath, 'vis',
                 os.path.basename(image_name)[:-4] + "_posed.jpg"), posed_image)
 
+    # zone = DangerZone(
+    #     hull=[
+    #         Point(320, 350),
+    #         Point(305, 400),
+    #         Point(405, 400),
+    #         Point(390, 350)
+    #     ],
+    #     upper_shift=Point(0, -300)
+    # )
+
     zone = DangerZone(
         hull=[
-            Point(320, 350),
-            Point(305, 400),
-            Point(405, 400),
-            Point(390, 350)
+            Point(470, 360),
+            Point(415, 485),
+            Point(630, 530),
+            Point(670, 395)
         ],
-        upper_shift=Point(0, -300)
+        upper_shift=Point(0, -350)
     )
 
     image_with_zone = draw_zone(posed_image, zone)
@@ -121,6 +189,19 @@ def example():
 
     with open(os.path.join(outputpath, os.path.basename(image_name)[:-4] + "_result_packed.json"), 'w') as json_file:
         json_file.write(json.dumps(packed_json, indent=2))
+
+    for people in packed_json["persons"]:
+        name = people["person_id"]
+        keypoints = people["keypoints"]
+
+        if zone.contain_pose(keypoints):
+            print(f"People[{name}] inside danger zone!")
+
+    cv2.imshow("frame", image_with_zone)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+
+    # use_webcam(pose_estimator, zone)
 
 
 if __name__ == "__main__":
