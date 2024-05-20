@@ -2,6 +2,7 @@
 *.jpeg
 *.png
 *.json
+*.mp4
 
 !configs/pose_estimator_config.json
 

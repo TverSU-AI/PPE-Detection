@@ -82,6 +82,7 @@ parser.add_argument('--pose_flow', dest='pose_flow',
                     help='track humans in video with PoseFlow', action='store_true', default=False)
 parser.add_argument('--pose_track', dest='pose_track',
                     help='track humans in video with reid', action='store_true', default=False)
+parser.add_argument("--tracker_path", dest="tracker_path", type=str, default="")
 parser.add_argument('--model_cfg', dest='model_cfg',
                     default='detector/yolo/cfg/yolov3-spp.cfg')
 parser.add_argument('--model_weights', dest='model_weights',
@@ -89,6 +90,9 @@ parser.add_argument('--model_weights', dest='model_weights',
 
 args = parser.parse_args()
 cfg = update_config(args.cfg)
+
+if args.tracker_path != "":
+    tcfg.loadmodel = args.tracker_path
 
 if platform.system() == 'Windows':
     args.sp = True
@@ -307,6 +311,12 @@ if __name__ == "__main__":
     except Exception as e:
         print(repr(e))
         print('An error as above occurs when processing the images, please check it')
+        writer.stop()
+        det_loader.stop()
+        det_loader.terminate()
+        writer.terminate()
+        writer.clear_queues()
+        det_loader.clear_queues()
         pass
     except KeyboardInterrupt:
         print_finish_info()
